@@ -19,8 +19,6 @@ metadata_dict = {
     "test": TestBase.metadata,
 }
 
-bind_keys = ["default"] + list(SQLALCHEMY_BINDS.keys())
-
 
 def do_run_migrations(connection, metadata, bind_key=None):
     context.configure(

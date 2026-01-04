@@ -1,11 +1,8 @@
 import math
 from contextvars import ContextVar
-from datetime import datetime
-from typing import cast
 
-from sqlalchemy import DateTime, Integer, and_, func, select
+from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 
