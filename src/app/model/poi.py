@@ -1,0 +1,33 @@
+from geoalchemy2 import Geometry
+from geoalchemy2.shape import to_shape
+from sqlalchemy import String
+from sqlalchemy.orm import mapped_column
+
+from app.model.base import TestBase
+from app.model.database import db
+from app.schema.poi import CreatePOIBody
+
+
+class POI(TestBase):
+    __tablename__ = "poi"
+    __table_args__ = {"comment": "地名表"}
+    name = mapped_column(String(32), nullable=False, unique=True, comment="名称")
+    location = mapped_column(Geometry(geometry_type="POINT", srid=4326), comment="位置")
+
+    @staticmethod
+    def create(body: CreatePOIBody):
+        poi = POI()
+
+        poi.name = body.name
+        poi.location = f"SRID=4326;POINT({body.lng} {body.lat})"
+
+        db.session.add(poi)
+        db.session.commit()
+
+    def data(self):
+        if self.location:
+            point = to_shape(self.location)
+            location = [point.x, point.y]
+        else:
+            location = None
+        return {"id": self.id, "name": self.name, "location": location}

@@ -1,0 +1,57 @@
+version: "3"
+services:
+  star-api-demo:
+    image: star-api-demo:1.0.0
+    container_name: star-api-demo
+
+    privileged: true
+    restart: always
+
+    environment:
+      - PROCESSES=4
+      - HTTP_TIMEOUT=60
+
+    depends_on:
+      - star-api-demo-postgres
+      - star-api-demo-redis
+
+    ports:
+      - "20261:5000"
+
+    volumes:
+      - "/data/star-api-demo/data:/data/data"
+      - "/data/star-api-demo/log:/data/log"
+      - "./:/work"
+
+  star-api-demo-postgres:
+    image: postgis/postgis:16-3.5
+    container_name: star-api-demo-postgres
+    restart: always
+
+    ports:
+      - "20262:5432"
+
+    environment:
+      # 使用上海时区
+      - TZ=Asia/Shanghai
+      - POSTGRES_PASSWORD=123456
+      - POSTGRES_DB=star
+
+    volumes:
+      - /data/star-api-demo/data/postgres:/var/lib/postgresql/data
+
+  star-api-demo-redis:
+    image: redis:8
+    container_name: star-api-demo-redis
+    restart: always
+
+    ports:
+      - "20263:6379"
+
+    volumes:
+      - /data/star-api-demo/data/redis:/data
+
+networks:
+  default:
+    external: true
+    name: star

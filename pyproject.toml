@@ -1,0 +1,48 @@
+[project]
+name = "star-api-demo"
+version = "1.0.0"
+description = "star openapi demo"
+requires-python = ">=3.14"
+dependencies = [
+    "star-openapi==0.9.0",
+    "star-openapi-swagger>=5.31.0",
+    "star-openapi-scalar>=1.40.9",
+    "alembic==1.17.2",
+    "asyncpg==0.31.0",
+    "rq==2.6.1",
+    "redis==7.1.0",
+    "cython==3.2.3",
+    "setuptools==80.9.0",
+    "GeoAlchemy2[shapely]==0.18.1",
+    "uvicorn>=0.40.0",
+    "httptools==0.7.1",
+    "pyjwt==2.10.1",
+    "passlib[bcrypt]==1.7.4",
+    "supervisor==4.3.0",
+    "greenlet==3.3.0",
+    "pydantic>=2.12.5",
+]
+
+[dependency-groups]
+ruff = ["ruff"]
+
+[tool.uv]
+default-groups = "all"
+
+[[tool.uv.index]]
+url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+default = true
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = [
+    "I", # Import related rules - 处理 import 语句相关的规则，如排序、分组等
+    "E4", # Import order - 导入语句的排序问题
+    "E7", # Statement issues - 语句相关的问题，如不必要的 pass、return 等
+    "E9", # Runtime errors - 运行时错误，如语法错误等
+    "F", # Pyflakes rules - Pyflakes 检测到的问题，如未使用的变量、未定义的名称等
+    "Q", # flake8-quotes
+    "UP045", # Use X | None for type annotations
+]
