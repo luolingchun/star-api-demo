@@ -17,7 +17,7 @@ from app.schema.user.user import UpdateUserBody
 from app.utils.exceptions import ActiveException, PasswordException, UserNotExistException
 
 from . import db
-from .base import DefaultBase
+from .database import DefaultBase
 
 UserRole = Table(
     "user_role",

@@ -1,17 +1,74 @@
 import math
 from contextvars import ContextVar
+from datetime import datetime
 
-from sqlalchemy import and_, func, select
+from sqlalchemy import DateTime, Integer, and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.requests import Request
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
-from app.config import SQLALCHEMY_DATABASE_URI
+from app.config import (
+    PG_PASSWORD,
+    PG_URL,
+    PG_USER,
+    SQLALCHEMY_ENGINE_OPTIONS,
+)
 from app.utils.exceptions import ResourceExistException
 
-# 创建 engine 和 sessionmaker
-engine = create_async_engine(SQLALCHEMY_DATABASE_URI)
-async_session = async_sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
+
+class DefaultBase(DeclarativeBase):
+    """基础数据库模型：提供id、创建时间、更新时间"""
+
+    __abstract__ = True
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True, comment="主键")
+    create_time: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, comment="创建时间")
+    update_time: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.now, onupdate=datetime.now, comment="更新时间"
+    )
+
+
+class TestBase(DeclarativeBase):
+    """test 数据库基础模型"""
+
+    __abstract__ = True
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True, comment="主键")
+    create_time: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, comment="创建时间")
+    update_time: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.now, onupdate=datetime.now, comment="更新时间"
+    )
+
+
+# 多数据库定义
+sqlalchemy_engines = {
+    "default": {
+        "engine": create_async_engine(
+            f"postgresql+asyncpg://{PG_USER}:{PG_PASSWORD}@{PG_URL}/star", **SQLALCHEMY_ENGINE_OPTIONS
+        ),
+        "metadata": DefaultBase.metadata,
+    },
+    "test": {
+        "engine": create_async_engine(
+            f"postgresql+asyncpg://{PG_USER}:{PG_PASSWORD}@{PG_URL}/test", **SQLALCHEMY_ENGINE_OPTIONS
+        ),
+        "metadata": TestBase.metadata,
+    },
+}
+
+
+# 多数据库引擎
+sqlalchemy_sessions = {
+    "default": async_sessionmaker(
+        bind=sqlalchemy_engines["default"]["engine"],
+        autoflush=False,
+        expire_on_commit=False,
+    ),
+    "test": async_sessionmaker(
+        bind=sqlalchemy_engines["test"]["engine"],
+        autoflush=False,
+        expire_on_commit=False,
+    ),
+}
 
 
 # ContextVar 存储当前 session
@@ -21,18 +78,20 @@ _db_session_ctx: ContextVar[AsyncSession | None] = ContextVar("_db_session_ctx",
 class DB:
     @property
     def session(self) -> AsyncSession:
+        return self.get_session()
+
+    @staticmethod
+    def get_session(engine="default") -> AsyncSession:
         # 创建 session
         session = _db_session_ctx.get()
         if session is None:
-            session = async_session()
+            session = sqlalchemy_sessions.get(engine, sqlalchemy_sessions["default"])()
             _db_session_ctx.set(session)
         return session
 
     @staticmethod
     async def close_db():
-        """
-        关闭当前请求的 session（如果存在）
-        """
+        # 关闭当前请求的 session（如果存在）
         session = _db_session_ctx.get()
         if session is not None:
             await session.close()
@@ -42,12 +101,17 @@ class DB:
 db = DB()
 
 
-# 中间件：请求结束统一关闭 session
-class DBSessionMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request: Request, call_next):
+class DBSessionMiddleware:
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+
         try:
-            response = await call_next(request)
-            return response
+            await self.app(scope, receive, send)
         finally:
             await db.close_db()
 

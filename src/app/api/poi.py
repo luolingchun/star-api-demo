@@ -18,18 +18,18 @@ api = APIRouter(url_prefix=url_prefix, tags=[tag], security=JWT)
 
 @api.post("/", summary="创建地名")
 async def create_book(body: CreatePOIBody):
-    result = await db.session.execute(select(POI).where(POI.name == body.name))
+    result = await db.get_session("test").execute(select(POI).where(POI.name == body.name))
     poi = result.scalar()
     if poi:
         raise ResourceExistException()
-    POI.create(body)
+    await POI.create(body)
     return response()
 
 
 @api.get("/", summary="获取地名数据列表")
 async def get_poi(query: PageModel):
     offset, limit = get_offset_limit(query.page, query.page_size)
-    result = await db.session.execute(select(POI).order_by(POI.id.desc()).offset(offset).limit(limit))
+    result = await db.get_session("test").execute(select(POI).order_by(POI.id.desc()).offset(offset).limit(limit))
     poi_list = result.scalars()
     total, total_page = await get_total_page(POI.id, [], limit)
     data = [poi.data() for poi in poi_list]

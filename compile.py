@@ -76,10 +76,11 @@ for root, dirs, files in os.walk("."):
             dst_path = os.path.join(dist, file_path)
             os.makedirs(os.path.dirname(dst_path), exist_ok=True)
             shutil.move(file_path, dst_path)
-        elif "migrations" in root:
-            shutil.copytree(os.path.join(root, file), dist, dirs_exist_ok=True)
         elif _name in exclude_module_list:
             # 拷贝跳过编译的文件
             dst_path = os.path.join(dist, file_path)
             os.makedirs(os.path.dirname(dst_path), exist_ok=True)
             shutil.copy(file_path, dst_path)
+
+# 拷贝 migrations 文件夹
+shutil.copytree("migrations", os.path.join(dist, "migrations"), dirs_exist_ok=True)

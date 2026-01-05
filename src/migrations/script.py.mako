@@ -27,9 +27,9 @@ def downgrade(engine_name):
     globals()["downgrade_%s" % engine_name]()
 
 <%
-    from app.config import SQLALCHEMY_BINDS
+    from app.model.database import sqlalchemy_engines
 
-    db_names = ["default"] + list(SQLALCHEMY_BINDS.keys())
+    db_names = list(sqlalchemy_engines.keys())
 %>
 
 ## generate an "upgrade_<xyz>() / downgrade_<xyz>()" function

@@ -159,5 +159,5 @@ if __name__ == "__main__":
         loop="asyncio",
         http="httptools",
         # 限制并发请求数
-        limit_concurrency=100,
+        limit_concurrency=2000,
     )

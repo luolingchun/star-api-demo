@@ -3,8 +3,7 @@ from geoalchemy2.shape import to_shape
 from sqlalchemy import String
 from sqlalchemy.orm import mapped_column
 
-from app.model.base import TestBase
-from app.model.database import db
+from app.model.database import TestBase, db
 from app.schema.poi import CreatePOIBody
 
 
@@ -15,14 +14,14 @@ class POI(TestBase):
     location = mapped_column(Geometry(geometry_type="POINT", srid=4326), comment="位置")
 
     @staticmethod
-    def create(body: CreatePOIBody):
+    async def create(body: CreatePOIBody):
         poi = POI()
 
         poi.name = body.name
         poi.location = f"SRID=4326;POINT({body.lng} {body.lat})"
 
         db.session.add(poi)
-        db.session.commit()
+        await db.session.commit()
 
     def data(self):
         if self.location:

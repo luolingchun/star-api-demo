@@ -13,11 +13,18 @@ if not bool(int(os.getenv("DEV", 0))):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 # SQLALCHEMY_DATABASE_URI = SQLITE_DB_URI
 SQLALCHEMY_DATABASE_URI = DB_URI
-# 多数据库
-SQLALCHEMY_BINDS = {
-    "test": f"postgresql+asyncpg://{PG_USER}:{PG_PASSWORD}@{PG_URL}/test",
-}
+
+
 SQLALCHEMY_ENGINE_OPTIONS = {
     # 全局写入json时的序列化操作
-    "json_serializer": lambda obj: json.dumps(obj, ensure_ascii=False)
+    "json_serializer": lambda obj: json.dumps(obj, ensure_ascii=False),
+    # 连接池中的连接数量
+    "pool_size": 20,
+    # 连接池外允许的最大连接数
+    "max_overflow": 30,
+    # 启用连接预检查
+    "pool_pre_ping": True,
+    "pool_timeout": 30,
+    # 连接回收时间（秒）
+    "pool_recycle": 3600,
 }
