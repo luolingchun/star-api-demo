@@ -149,12 +149,11 @@ def register_permission():
 
 if __name__ == "__main__":
     uvicorn.run(
-        "asgi:app",
+        app,
         host="0.0.0.0",
-        port=int(os.getenv("SERVER_PORT", "8000")),
-        reload=os.getenv("DEBUG", "false").lower() == "true",
+        port=8000,
+        reload=True,
         # 工作进程数
-        # workers=int(os.getenv("CPU", 0)) or os.cpu_count(),
         workers=1,
         loop="asyncio",
         http="httptools",

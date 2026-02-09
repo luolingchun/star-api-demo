@@ -10,12 +10,8 @@ class JobQuery(PageModel):
     status: JobStatus = Field(..., description="任务状态")
 
 
-class JobPath(BaseModel):
-    job_id: str = Field(..., description="任务UUID")
-
-
 class JobResponse(BaseModel):
-    job_id: str = Field(..., description="UUID")
+    id: str = Field(..., description="UUID")
     args: List[Any] = Field(None, description="参数")
     kwargs: Dict[str, Any] = Field(None, description="关键字参数")
     result: Any = Field(None, description="结果")

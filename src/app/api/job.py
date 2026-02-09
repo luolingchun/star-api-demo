@@ -10,7 +10,8 @@ from star_openapi import APIRouter, Tag
 from app.config import API_PREFIX, JWT, REDIS_CONNECT
 from app.job import job_test
 from app.rq import default_queue
-from app.schema.job import JobPath, JobQuery
+from app.schema import IdStringModel
+from app.schema.job import JobQuery
 from app.utils.enums import PermissionGroup
 from app.utils.exceptions import JobNotExistException, JobNotRetryException
 from app.utils.jwt_tools import role_required
@@ -100,25 +101,25 @@ def query_job(query: JobQuery):
     return response(data=job_attributes[offset : (offset + page_size)], total=total, total_page=total_page)
 
 
-@api.delete("/<job_id>")
-def del_job(path: JobPath):
+@api.delete("/{id}")
+def del_job(path: IdStringModel):
     """任务删除"""
     try:
-        job = Job.fetch(path.job_id, connection=REDIS_CONNECT)
+        job = Job.fetch(path.id, connection=REDIS_CONNECT)
     except NoSuchJobError:
         raise JobNotExistException()
 
-    send_stop_job_command(REDIS_CONNECT, path.job_id)
+    send_stop_job_command(REDIS_CONNECT, path.id)
     job.delete()
     return response()
 
 
-@api.put("/<job_id>")
+@api.put("/{id}")
 @role_required(name="重试异步任务", module=PermissionGroup.JOB, uuid="54f0ed18-9c06-11eb-9220-8cec4baea5d8")
-def retry_job(path: JobPath):
+def retry_job(path: IdStringModel):
     """重试异步任务"""
     try:
-        job = Job.fetch(path.job_id, connection=REDIS_CONNECT)
+        job = Job.fetch(path.id, connection=REDIS_CONNECT)
     except NoSuchJobError:
         raise JobNotExistException()
 

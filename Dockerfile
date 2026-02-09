@@ -57,6 +57,7 @@ ENV PYTHONPATH=/work/src
 
 # 程序部署
 COPY conf/supervisor.ini /etc/supervisord.d/supervisor.ini
+COPY scripts /work/scripts
 COPY src /work/src
 
 

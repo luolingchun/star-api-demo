@@ -41,6 +41,8 @@ def role_required(name, module, uuid):
             user = await get_current_user(request)
 
             if await is_user_allowed(user, func.uuid):
+                if "request" in func.__code__.co_varnames:
+                    kwargs["request"] = request
                 return await func(*args, **kwargs)
             else:
                 raise PermissionException(message="权限不足")
@@ -88,6 +90,8 @@ def download_required(name, module, uuid):
                 raise UserNotExistException()
 
             if await is_user_allowed(user, func.uuid):
+                if "request" in func.__code__.co_varnames:
+                    kwargs["request"] = request
                 return await func(*args, **kwargs)
             else:
                 raise PermissionException(message="权限不足")
@@ -105,6 +109,8 @@ def login_required(func):
         user = await get_current_user(request)
         if not user.is_active:
             raise ActiveException()
+        if "request" in func.__code__.co_varnames:
+            kwargs["request"] = request
         return await func(*args, **kwargs)
 
     return wrapper
@@ -118,6 +124,8 @@ def is_super(func):
         user = await get_current_user(request)
         if not user.is_super:
             raise PermissionException(message="权限不足")
+        if "request" in func.__code__.co_varnames:
+            kwargs["request"] = request
         return await func(*args, **kwargs)
 
     return wrapper

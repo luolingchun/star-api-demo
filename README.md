@@ -40,9 +40,7 @@
 4. 数据库迁移：
 
     1. docker exec -it star-api-demo bash
-    2. alembic init alembic
-    3. star db migrate -d /data/data/migrations
-    4. star db upgrade -d /data/data/migrations
+    2. cd /work/scripts && sh deploy.sh
 
 5. 初始化数据库：
 

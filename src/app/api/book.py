@@ -23,7 +23,7 @@ async def create_book(body: BookBody):
     return response()
 
 
-@api.get("/<int:id>", security=BASIC)
+@api.get("/{id}", security=BASIC)
 @basic_required
 async def get_book(path: BookQuery):
     """查询图书"""
@@ -31,7 +31,7 @@ async def get_book(path: BookQuery):
     return response(data=path.id)
 
 
-@api.delete("/<int:id>")
+@api.delete("/{id}")
 async def delete_book(path: BookQuery):
     """删除图书"""
     print(f"delete {path.id}")

@@ -132,7 +132,7 @@ async def update_role(path: IdModel, body: UpdateRoleBody):
     return response()
 
 
-@api.delete("/roles/<int:id>", summary="删除角色")
+@api.delete("/roles/{id}", summary="删除角色")
 @role_required(name="删除角色", module="角色", uuid="cdb35c5d-f5c9-4ff5-ba6c-5bba8349a176")
 async def delete_role(path: IdModel):
     """删除角色"""
