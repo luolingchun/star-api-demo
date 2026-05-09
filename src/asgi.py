@@ -1,5 +1,4 @@
 import asyncio
-import os
 
 import uvicorn
 from sqlalchemy import select
@@ -11,10 +10,12 @@ from app.model.database import db
 app = create_app()
 
 
-@app.route("/")
 def index(_):
     """根目录重定向到openapi"""
     return RedirectResponse(url="/openapi/swagger")
+
+
+app.add_route("/", index)
 
 
 @app.cli.command("drop_alembic_version")
@@ -149,12 +150,10 @@ def register_permission():
 
 if __name__ == "__main__":
     uvicorn.run(
-        app,
+        "asgi:app",
         host="0.0.0.0",
         port=8000,
         reload=True,
-        # 工作进程数
-        workers=1,
         loop="asyncio",
         http="httptools",
         # 限制并发请求数
