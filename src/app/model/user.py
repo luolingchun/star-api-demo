@@ -8,9 +8,9 @@ User和Role为多对多关系
 Role和Permission为多对多关系
 """
 
-from passlib.hash import sha256_crypt
+from passlib.hash import sha256_crypt  # type: ignore
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Table, select
-from sqlalchemy.orm import Mapped, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.schema.user.admin import AddUserBody, UpdateRoleBody
 from app.schema.user.user import UpdateUserBody
@@ -37,12 +37,14 @@ RolePermission = Table(
 class User(DefaultBase):
     __tablename__ = "user"
     __table_args__ = {"comment": "用户表"}
-    username: Mapped[str] = Column(String(32), unique=True, nullable=False, comment="用户名")
-    fullname: Mapped[str] = Column(String(32), unique=False, nullable=False, default="", comment="姓名")
-    _password = Column("password", String(1024), comment="密码")
+    username: Mapped[str] = mapped_column(String(32), unique=True, nullable=False, comment="用户名")
+    fullname: Mapped[str] = mapped_column(String(32), unique=False, nullable=False, default="", comment="姓名")
+    _password: Mapped[str] = mapped_column("password", String(1024), comment="密码")
 
-    is_super: Mapped[bool] = Column(Boolean, unique=False, nullable=False, default=False, comment="是否是超级管理员")
-    is_active: Mapped[bool] = Column(Boolean, unique=False, nullable=False, default=False, comment="是否激活")
+    is_super: Mapped[bool] = mapped_column(
+        Boolean, unique=False, nullable=False, default=False, comment="是否是超级管理员"
+    )
+    is_active: Mapped[bool] = mapped_column(Boolean, unique=False, nullable=False, default=False, comment="是否激活")
 
     roles = relationship("Role", secondary=UserRole, back_populates="users", lazy="selectin")
 
@@ -144,8 +146,8 @@ class User(DefaultBase):
 class Role(DefaultBase):
     __tablename__ = "role"
     __table_args__ = {"comment": "角色表"}
-    name: Mapped[str] = Column(String(32), unique=True, comment="角色名称")
-    describe = Column(String(255), comment="角色描述")
+    name: Mapped[str] = mapped_column(String(32), unique=True, comment="角色名称")
+    describe: Mapped[str] = mapped_column(String(255), nullable=True, comment="角色描述")
 
     users = relationship("User", secondary=UserRole, back_populates="roles", lazy="selectin")
     permissions = relationship("Permission", secondary=RolePermission, back_populates="roles", lazy="selectin")
@@ -185,9 +187,9 @@ class Role(DefaultBase):
 class Permission(DefaultBase):
     __tablename__ = "permission"
     __table_args__ = {"comment": "权限表"}
-    name = Column(String(32), unique=True, comment="权限名称")
-    module = Column(String(32), comment="权限模块")
-    uuid = Column(String(255), unique=True, comment="权限uuid")
+    name: Mapped[str] = mapped_column(String(32), unique=True, comment="权限名称")
+    module: Mapped[str] = mapped_column(String(32), comment="权限模块")
+    uuid: Mapped[str] = mapped_column(String(255), unique=True, comment="权限uuid")
 
     roles = relationship("Role", secondary=RolePermission, back_populates="permissions")
 

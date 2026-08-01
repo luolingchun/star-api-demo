@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-# @Author  : llc
-# @Time    : 2020/5/4 17:11
-
 from pydantic import BaseModel, Field
 
 
@@ -17,5 +13,5 @@ class LoginBody(BaseModel):
 
 
 class UpdateUserBody(BaseModel):
-    username: str = Field(None, min_length=4, max_length=32, description="用户名")
-    fullname: str = Field(None, min_length=2, max_length=32, description="姓名")
+    username: str = Field("", min_length=4, max_length=32, description="用户名")
+    fullname: str = Field("", min_length=2, max_length=32, description="姓名")

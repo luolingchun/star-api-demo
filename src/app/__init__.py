@@ -77,7 +77,7 @@ def init_rq():
 def create_app():
     from . import config
 
-    # 创建Flask实例
+    # 创建APP实例
     app = OpenAPI(
         info=Info(title=config.APP_NAME, version=config.APP_VERSION),
         security_schemes={

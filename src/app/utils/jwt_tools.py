@@ -1,3 +1,4 @@
+import inspect
 import time
 from functools import wraps
 
@@ -41,7 +42,7 @@ def role_required(name, module, uuid):
             user = await get_current_user(request)
 
             if await is_user_allowed(user, func.uuid):
-                if "request" in func.__code__.co_varnames:
+                if "request" in inspect.signature(func).parameters:
                     kwargs["request"] = request
                 return await func(*args, **kwargs)
             else:
@@ -89,8 +90,10 @@ def download_required(name, module, uuid):
             if user is None:
                 raise UserNotExistException()
 
+            request.state.user = user
+
             if await is_user_allowed(user, func.uuid):
-                if "request" in func.__code__.co_varnames:
+                if "request" in inspect.signature(func).parameters:
                     kwargs["request"] = request
                 return await func(*args, **kwargs)
             else:
@@ -109,7 +112,7 @@ def login_required(func):
         user = await get_current_user(request)
         if not user.is_active:
             raise ActiveException()
-        if "request" in func.__code__.co_varnames:
+        if "request" in inspect.signature(func).parameters:
             kwargs["request"] = request
         return await func(*args, **kwargs)
 
@@ -124,7 +127,7 @@ def is_super(func):
         user = await get_current_user(request)
         if not user.is_super:
             raise PermissionException(message="权限不足")
-        if "request" in func.__code__.co_varnames:
+        if "request" in inspect.signature(func).parameters:
             kwargs["request"] = request
         return await func(*args, **kwargs)
 
@@ -152,6 +155,9 @@ async def get_current_user(request: Request):
     user: User = result.scalar()
     if user is None:
         raise UserNotExistException()
+
+    request.state.user = user
+
     return user
 
 

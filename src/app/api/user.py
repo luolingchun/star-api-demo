@@ -9,7 +9,7 @@ from app.model.database import db
 from app.model.user import Permission, User
 from app.schema.user.user import LoginBody, ModifyPasswordBody
 from app.utils.exceptions import ExpiredTokenException, InvalidTokenException, RefreshException, UserNotExistException
-from app.utils.jwt_tools import get_current_user, get_token, login_required
+from app.utils.jwt_tools import get_token, login_required
 from app.utils.response import response
 
 __version__ = "/v1"
@@ -31,7 +31,7 @@ async def login(body: LoginBody):
 @login_required
 async def get_info(request: Request):
     """获取用户信息"""
-    user = await get_current_user(request)
+    user = request.state.user
     data = {
         "username": user.username,
         "email": user.email,
@@ -43,7 +43,7 @@ async def get_info(request: Request):
 @login_required
 async def modify_password(request: Request, body: ModifyPasswordBody):
     """修改密码"""
-    user = await get_current_user(request)
+    user = request.state.user
     await user.modify_password(body.old_password, body.new_password, body.confirm_password)
     return response()
 
@@ -52,7 +52,7 @@ async def modify_password(request: Request, body: ModifyPasswordBody):
 @login_required
 async def get_permissions(request: Request):
     """获取用户拥有的权限"""
-    user = await get_current_user(request)
+    user = request.state.user
     if user.is_super:
         result = await db.session.execute(select(Permission))
         permissions = result.scalars()

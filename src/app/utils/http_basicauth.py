@@ -1,3 +1,4 @@
+import inspect
 from functools import wraps
 
 from app.config import BASIC_AUTH_PASSWORD, BASIC_AUTH_USERNAME
@@ -24,6 +25,9 @@ def basic_required(func):
 
         if not is_passed:
             raise PasswordException()
+
+        if "request" in inspect.signature(func).parameters:
+            kwargs["request"] = request
 
         return await func(request, *args, **kwargs)
 

@@ -1,8 +1,10 @@
+from typing import cast
+
 from rq import Queue
 
 from app.config import REDIS_CONNECT
 
-default_queue: Queue | None = None
+default_queue: Queue = cast(Queue, cast(object, None))
 
 
 def init_queue():

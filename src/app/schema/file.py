@@ -4,8 +4,8 @@ from star_openapi import UploadFile
 
 class UploadFileForm(BaseModel):
     file: UploadFile
-    file_type: str = Field(None, description="文件类型")
+    file_type: str = Field("", description="文件类型")
 
 
 class DownloadFileQuery(BaseModel):
-    filename: str = Field(None, description="文件名称")
+    filename: str = Field("", description="文件名称")
