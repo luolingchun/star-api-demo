@@ -4,7 +4,8 @@ version = "1.0.0"
 description = "star openapi demo"
 requires-python = ">=3.14"
 dependencies = [
-    "star-openapi==0.9.5",
+    "starlette==1.7.0",
+    "star-openapi==0.9.8",
     "star-openapi-swagger>=5.31.0",
     "star-openapi-scalar>=1.40.9",
     "alembic==1.17.2",
@@ -17,12 +18,11 @@ dependencies = [
     "uvicorn>=0.40.0",
     "httptools==0.7.1",
     "pyjwt==2.12.1",
-    "passlib[bcrypt]==1.7.4",
     "supervisor==4.3.0",
     "greenlet==3.5.0",
     "pydantic==2.13.4",
     "sqlalchemy==2.0.49",
-    "starlette==1.0.0",
+    "argon2-cffi==25.1.0",
 ]
 
 [dependency-groups]

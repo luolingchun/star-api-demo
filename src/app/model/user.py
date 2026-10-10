@@ -8,7 +8,8 @@ User和Role为多对多关系
 Role和Permission为多对多关系
 """
 
-from passlib.hash import sha256_crypt  # type: ignore
+from argon2 import PasswordHasher
+from argon2.exceptions import VerifyMismatchError
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Table, select
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -22,8 +23,8 @@ from .database import DefaultBase
 UserRole = Table(
     "user_role",
     DefaultBase.metadata,
-    Column("user_id", Integer, ForeignKey("user.id"), primary_key=True),
-    Column("role_id", Integer, ForeignKey("role.id"), primary_key=True),
+    Column("user_id", Integer, ForeignKey("user.id")),
+    Column("role_id", Integer, ForeignKey("role.id")),
 )
 
 RolePermission = Table(
@@ -32,6 +33,8 @@ RolePermission = Table(
     Column("role_id", Integer, ForeignKey("role.id")),
     Column("permission_id", Integer, ForeignKey("permission.id")),
 )
+
+ph = PasswordHasher()
 
 
 class User(DefaultBase):
@@ -48,20 +51,21 @@ class User(DefaultBase):
 
     roles = relationship("Role", secondary=UserRole, back_populates="users", lazy="selectin")
 
-    system = Column(String(100), comment="系统")
-
     @property
     def password(self):
         return self._password
 
     @password.setter
     def password(self, raw):
-        self._password = sha256_crypt.hash(raw)
+        self._password = ph.hash(raw)
 
     def check_password(self, raw):
         if not self._password:
             return False
-        return sha256_crypt.verify(raw, self._password)
+        try:
+            return ph.verify(self._password, raw)
+        except VerifyMismatchError:
+            return False
 
     async def modify_password(self, session, old_password=None, new_password=None, confirm_password=None, admin=False):
         if new_password != confirm_password:
